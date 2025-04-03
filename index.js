@@ -51,17 +51,19 @@ app.use((req, res, next) => {
 
 // Endpoint para abrir a conexão SSE (fluxo contínuo)
 app.get("/events", (req, res) => {
+    console.info('Conexão SSE iniciada');
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
-    transport = new SSEServerTransport("/message", res);
+    transport = new SSEServerTransport("message", res);
 });
 
 // Endpoint para receber mensagens do agente (POST MCP)
 app.post("/message", async (req, res) => {
     if (transport) {
+        console.info('Mensagem recebida do agente:', req.body);
         await transport.handlePostMessage(req, res);
     } else {
         res.status(503).send("Conexão SSE não iniciada.");
