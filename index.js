@@ -37,8 +37,20 @@ server.tool(
 
 let transport; // Armazena a instância do transporte SSE
 
+app.options("*", (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.sendStatus(200);
+});
+
 // Endpoint para abrir a conexão SSE (fluxo contínuo)
 app.get("/events", (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
     transport = new SSEServerTransport("/message", res);
 });
 
