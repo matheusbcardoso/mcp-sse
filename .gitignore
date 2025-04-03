@@ -1,0 +1,26 @@
+# Node.js
+node_modules/
+dist/
+.env
+.env.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+
+# Logs
+logs
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Editor configs
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# OS arquivos
+Thumbs.db
