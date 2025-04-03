@@ -46,11 +46,11 @@ app.use((req, res, next) => {
 
 // Endpoint para abrir a conexão SSE (fluxo contínuo)
 app.get("/events", (req, res) => {
-    // res.setHeader("Access-Control-Allow-Origin", "*");
-    // res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    // res.setHeader("Content-Type", "text/event-stream");
-    // res.setHeader("Cache-Control", "no-cache");
-    // res.setHeader("Connection", "keep-alive");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
     transport = new SSEServerTransport("/message", res);
 });
 
