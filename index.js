@@ -41,7 +41,12 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    res.sendStatus(200);
+
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(200); // responde apenas preflight
+    }
+
+    next(); // segue para as rotas
 });
 
 // Endpoint para abrir a conexão SSE (fluxo contínuo)
