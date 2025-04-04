@@ -10,6 +10,7 @@ const server = new McpServer({
   version: "1.0.0"
 });
 
+
 // ##################################################
 // ... set up server resources, tools, and prompts ...
 
@@ -52,17 +53,16 @@ server.prompt(
 // Create an Express server
 const app = express();
 
-// Simplificado: apenas uma conexão global
-let transport: SSEServerTransport | null = null;
+// to support multiple simultaneous connections we have a lookup object from
+// sessionId to transport
+const transports: {[sessionId: string]: SSEServerTransport} = {};
 
 app.get("/sse", async (_: Request, res: Response) => {
-  // Criar um novo transporte para esta conexão
-  transport = new SSEServerTransport('/messages', res);
-  
+  const transport = new SSEServerTransport('/messages', res);
+  transports[transport.sessionId] = transport;
   res.on("close", () => {
-    transport = null;
+    delete transports[transport.sessionId];
   });
-  
   try {
     await server.connect(transport);
   } catch (error: any) {
@@ -72,13 +72,27 @@ app.get("/sse", async (_: Request, res: Response) => {
 });
 
 app.post("/messages", async (req: Request, res: Response) => {
+  const sessionId = req.query.sessionId as string;
+  const transport = transports[sessionId];
   if (transport) {
     await transport.handlePostMessage(req, res);
   } else {
-    console.error("No active transport connection");
-    res.status(400).send('No active transport connection');
+    console.error("No transport found for sessionId:", sessionId);
+    res.status(400).send('No transport found for sessionId');
   }
 });
+
+app.post("/message", async (req: Request, res: Response) => {
+  const sessionId = req.query.sessionId as string;
+  const transport = transports[sessionId];
+  if (transport) {
+    await transport.handlePostMessage(req, res);
+  } else {
+    console.error("No transport found for sessionId:", sessionId);
+    res.status(400).send('No transport found for sessionId');
+  }
+});
+
 
 app.listen(PORT);
 console.log(`Server started on http://localhost:${PORT}  🚀`);
