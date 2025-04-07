@@ -49,6 +49,8 @@ server.prompt(
   })
 );
 
+// ##################################################
+// Create an Express server
 const app = express();
 
 // Configure CORS middleware to allow all origins
@@ -78,21 +80,35 @@ app.get("/", (req, res) => {
   });
 });
 
-let transport: SSEServerTransport;
+// Simplificado: apenas uma conexão global
+let transport: SSEServerTransport | null = null;
 
-app.get("/sse", async (req, res) => {
-  console.log("aqui");
-  transport = new SSEServerTransport("/messages", res);
-  await server.connect(transport);
+app.get("/sse", async (req: Request, res: Response) => {
+  // Criar um novo transporte para esta conexão
+  transport = new SSEServerTransport('/messages', res);
+  
+  res.on("close", () => {
+    transport = null;
+  });
+  
+  try {
+    await server.connect(transport);
+  } catch (error: any) {
+    console.error("Error connecting transport:", error);
+    res.status(500).send("Error connecting transport");
+  }
 });
 
-app.post("/messages", async (req, res) => {
-  // Note: to support multiple simultaneous connections, these messages will
-  // need to be routed to a specific matching transport. (This logic isn't
-  // implemented here, for simplicity.)
-  await transport.handlePostMessage(req, res);
+app.post("/messages", async (req: Request, res: Response) => {
+  if (transport) {
+    await transport.handlePostMessage(req, res);
+  } else {
+    console.error("No active transport connection");
+    res.status(400).send('No active transport connection');
+  }
 });
 
-app.listen(PORT, () => {
-  console.log(`MCP SSE Server running on port ${PORT}`);
-});
+app.listen(PORT);
+console.log(`Server started on http://localhost:${PORT}  🚀`);
+console.log(`Connect to SSE stream at http://localhost:${PORT}/sse`);
+console.log(`Press Ctrl+C to stop the server`);
