@@ -86,7 +86,7 @@ server.tool(
     };
 
     try {
-      const response = await fetch(`https://api.clinicatotal.com.br/integracoes/chatbot/agenda?de=${data_de}&ate=${data_ate}`, requestOptions);
+      const response = await fetch(`https://api.clinicatotal.com.br/integracoes/chatbot/agenda?de=${data_de}&ate=${data_ate}&agendados=S`, requestOptions);
       const result = await response.text();
       return {
         content: [{ type: "text", text: `Cliente consultado: ${result}` }]
