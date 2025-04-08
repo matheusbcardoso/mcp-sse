@@ -40,7 +40,7 @@ server.tool(
 
 server.tool(
   "consultar cliente por cpf",
-  { cpf_cnpj: z.string() },
+  { cpf_cnpj: z.string().describe("CPF ou CNPJ do cliente a ser consultado") },
   async ({ cpf_cnpj }) => {
     console.info('Consultando API Key:', apiKey);
     const myHeaders = new Headers();    
@@ -67,20 +67,23 @@ server.tool(
   }
 );
 
-
+// Adicionar um prompt específico para consultas de cliente
 server.prompt(
-  "echo",
-  { message: z.string() },
-  ({ message }) => ({
-    messages: [{
-      role: "user",
-      content: {
-        type: "text",
-        text: `Please process this message: ${message}`
+  "consulta_cliente",
+  { query: z.string() },
+  ({ query }) => ({
+    messages: [
+      {
+        role: "user",
+        content: {
+          type: "text",
+          text: `Instruções: Você é um assistente para consulta de clientes. Quando eu solicitar busca de cliente por CPF ou CNPJ, use a ferramenta "consultar cliente por cpf" fornecendo o número informado. Minha consulta é: ${query}`
+        }
       }
-    }]
+    ]
   })
 );
+
 
 // ##################################################
 // Create an Express server
@@ -116,8 +119,7 @@ app.get("/", (req, res) => {
       "/messages": "POST endpoint for MCP messages",
     },
     tools: [
-      { name: "add", description: "Add two numbers together" },
-      { name: "search", description: "Faça pesquisas na web, tais como notícias, cotações, etc usando a Brave Search API" },
+      { name: "consultar cliente por cpf", description: "Consulta informações de um cliente pelo CPF ou CNPJ" },
     ],
   });
 });
