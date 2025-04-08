@@ -12,6 +12,8 @@ const server = new McpServer({
   version: "1.0.0"
 });
 
+let apiKey = '';
+
 // ##################################################
 // ... set up server resources, tools, and prompts ...
 
@@ -40,8 +42,8 @@ server.tool(
   "consultar cliente por cpf",
   { cpf_cnpj: z.string() },
   async ({ cpf_cnpj }) => {
-    const myHeaders = new Headers();
-    const apiKey = process.env.CLINICA_TOTAL_API_KEY || '';
+    console.info('Consultando API Key:', apiKey);
+    const myHeaders = new Headers();    
     myHeaders.append("Apikey", apiKey);
 
     const requestOptions = {
@@ -92,6 +94,15 @@ app.use(
     credentials: false,
   })
 );
+
+app.use((req, res, next) => {
+  const apiKeyHeader = req.header('X-API-Key') || req.header('Apikey');
+  if (apiKeyHeader) {
+    apiKey = apiKeyHeader;
+    console.log(`API Key recebida: ${apiKeyHeader.substring(0, 4)}...`); // Log parcial para segurança
+  }
+  next();
+});
 
 // Add a simple root route handler
 app.get("/", (req, res) => {
