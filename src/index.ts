@@ -67,6 +67,39 @@ server.tool(
   }
 );
 
+
+server.tool(
+  "Consulta Agenda",
+  { 
+    data_de: z.string().describe("Data inicial para a busca de uma agenda e o formato deve ser YYYY-MM-DD HH:mm:ss"),
+    data_ate: z.string().describe("Data final para a busca de uma agenda e o formato deve ser YYYY-MM-DD HH:mm:ss") 
+  },
+  async ({ data_de,  data_ate}) => {
+    console.info('Consultando API Key:', apiKey);
+    const myHeaders = new Headers();    
+    myHeaders.append("Apikey", apiKey);
+
+    const requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow" as RequestRedirect
+    };
+
+    try {
+      const response = await fetch(`https://api.clinicatotal.com.br/integracoes/chatbot/agenda?de=${data_de}&ate=${data_ate}`, requestOptions);
+      const result = await response.text();
+      return {
+        content: [{ type: "text", text: `Cliente consultado: ${result}` }]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      return {
+        content: [{ type: "text", text: `Erro na consulta: ${errorMessage}` }]
+      };
+    }
+  }
+);
+
 // Adicionar um prompt específico para consultas de cliente
 server.prompt(
   "consulta_cliente",
