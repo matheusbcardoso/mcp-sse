@@ -3,6 +3,7 @@ import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mc
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { z } from "zod";
 import cors from "cors";
+import { RequestRedirect } from 'node-fetch';
 
 const PORT = 3000;
 
@@ -34,6 +35,36 @@ server.tool(
     content: [{ type: "text", text: `Tool echo: ${message}` }]
   })
 );
+
+server.tool(
+  "consultar cliente por cpf",
+  { cpf_cnpj: z.string() },
+  async ({ cpf_cnpj }) => {
+    const myHeaders = new Headers();
+    const apiKey = process.env.CLINICA_TOTAL_API_KEY || '';
+    myHeaders.append("Apikey", apiKey);
+
+    const requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow" as RequestRedirect
+    };
+
+    try {
+      const response = await fetch(`https://api.clinicatotal.com.br/integracoes/chatbot/pessoa?cpf_cnpj=${cpf_cnpj}`, requestOptions);
+      const result = await response.text();
+      return {
+        content: [{ type: "text", text: `Cliente consultado: ${result}` }]
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      return {
+        content: [{ type: "text", text: `Erro na consulta: ${errorMessage}` }]
+      };
+    }
+  }
+);
+
 
 server.prompt(
   "echo",
