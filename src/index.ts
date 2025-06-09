@@ -132,6 +132,14 @@ app.use(
 );
 
 app.use((req, res, next) => {
+  console.log(`→ ${req.method} ${req.originalUrl}`);
+  // Se quiser ver headers ou body:
+  // console.log('Headers:', req.headers);
+  // console.log('Body:', req.body);
+  next();
+});
+
+app.use((req, res, next) => {
   const apiKeyHeader = req.header('X-API-Key') || req.header('Apikey');
   if (apiKeyHeader) {
     apiKey = apiKeyHeader;
